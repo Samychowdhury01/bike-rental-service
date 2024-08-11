@@ -52,12 +52,12 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     ];
   } else if (err instanceof Error) {
     message = err.message;
-    errorMessages = [
-      {
-        path: '',
-        message: err?.message,
-      },
-    ];
+    // errorMessages = [
+    //   {
+    //     path: '',
+    //     message: err?.message,
+    //   },
+    // ];
   }
 
   //ultimate return
