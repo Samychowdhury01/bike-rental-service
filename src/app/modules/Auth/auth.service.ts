@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import { TUser } from '../user/user.interface';
@@ -23,10 +24,9 @@ const loginUser = async (payload: TLoginUser) => {
   if (!user) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
   }
-  const isDeleted = user.isDeleted;
 
   // check existing user is deleted
-  if (isDeleted) {
+  if (user.isDeleted) {
     throw new AppError(httpStatus.UNAUTHORIZED, 'User is deleted');
   }
 
@@ -50,9 +50,11 @@ const loginUser = async (payload: TLoginUser) => {
     expiresIn: '30d',
   });
 
+  // removing the isDeleted flag and password  from response
+  const { isDeleted, password,...restData } = user.toObject();
   return {
     accessToken,
-    user
+    restData,
   };
 };
 

@@ -22,7 +22,7 @@ const loginUser = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     message: 'User logged in successfully',
     token: result.accessToken,
-    data: result.user,
+    data: result.restData,
   });
 });
 export const AuthControllers = {
