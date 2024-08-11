@@ -14,4 +14,8 @@ export type TUser = {
 // for custom statics method
 export interface TUserModel extends Model<TUser> {
   isUserExist(id: string): Promise<TUser | null>;
+  isPasswordMatched(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean>;
 }

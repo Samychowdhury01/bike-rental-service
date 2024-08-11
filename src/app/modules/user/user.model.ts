@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-this-alias */
 import { model, Schema } from 'mongoose';
 import { TUser, TUserModel } from './user.interface';
@@ -43,15 +44,29 @@ userSchema.pre('save', async function (next) {
 });
 
 // set empty string password property
-userSchema.post('save', async function (doc, next) {
-  doc.password = '';
+userSchema.post('save', function (doc: any, next) {
+  // Convert the document to an object and remove the fields
+  delete doc._doc.password;
+  delete doc._doc.isDeleted;
+
   next();
 });
 
-// statics method
+// statics method to find out user exist or not
 userSchema.statics.isUserExist = async function (id: string) {
-  const existingUser = await User.findById(id);
+  const existingUser = await User.findOne({
+    _id: id,
+    isDeleted: { $ne: true },
+  });
   return existingUser;
+};
+
+// statics method to compare the password
+userSchema.statics.isPasswordMatched = async function (
+  plainPassword: string,
+  hashedPassword: string,
+) {
+  return await bcrypt.compare(plainPassword, hashedPassword);
 };
 
 export const User = model<TUser, TUserModel>('User', userSchema);
