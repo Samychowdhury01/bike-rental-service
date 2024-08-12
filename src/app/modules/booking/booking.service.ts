@@ -76,10 +76,59 @@ const getUserRentalsFromDB = async (userId: string) => {
     throw new AppError(httpStatus.BAD_REQUEST, 'User does exist');
   }
   const bookings = await Booking.find({ userId });
-  return bookings
+  return bookings;
+};
+
+// return bike functionalities
+const updateBookingDetailsAfterReturn = async (id: string) => {
+  const booking = await Booking.findById(id);
+  if (!booking) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'No Data Found');
+  }
+  if (booking.isReturned) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'This bike has already been returned.',
+    );
+  }
+  const bike = await Bike.findById(booking?.bikeId);
+
+  //   calculating the cost
+  const startTime = new Date(booking.startTime);
+  const returnTime = new Date();
+  const rentalDurationHours = Math.ceil(
+    (returnTime.getTime() - startTime.getTime()) / (1000 * 60 * 60),
+  );
+  const pricePerHour = bike?.pricePerHour as number;
+  const totalCost = rentalDurationHours * pricePerHour;
+
+  // update bike available status
+  const updateBikeStatus = await Bike.findByIdAndUpdate(
+    booking.bikeId,
+    {
+      isAvailable: true,
+    },
+    {
+      new: true,
+    },
+  );
+  //   update booking data
+  const updatedBookingData = await Booking.findByIdAndUpdate(
+    booking._id,
+    {
+      isReturned: true,
+      returnTime,
+      totalCost,
+    },
+    {
+      new: true,
+    },
+  );
+  return updatedBookingData;
 };
 
 export const BookingServices = {
   createBookingIntoDB,
-  getUserRentalsFromDB
+  getUserRentalsFromDB,
+  updateBookingDetailsAfterReturn,
 };

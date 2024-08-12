@@ -25,7 +25,20 @@ const getUserRentals = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+// update booking details after return the bike
+const returnedBike = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await BookingServices.updateBookingDetailsAfterReturn(id);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Bike returned successfully',
+    data: result,
+  });
+});
 export const BookingControllers = {
   createBooking,
   getUserRentals,
+  returnedBike,
 };
