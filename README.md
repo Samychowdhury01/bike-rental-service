@@ -2,7 +2,7 @@
 
 This project is a CRUD application focused on providing bike rent service and managing bike bookings by admin only. Built using Express.js and TypeScript, it leverages the robustness of Mongoose, a MongoDB object modeling tool designed to work in an asynchronous environment. used the power of JWT to secure the application.
 
-# Technology stack and package
+## Technology stack and package
 
 1. Express.js
 2. TypeScript

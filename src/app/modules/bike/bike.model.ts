@@ -6,6 +6,7 @@ const bikeSchema = new Schema<TBike, IBikeModel>({
   name: {
     type: String,
     required: true,
+    unique: true,
   },
   description: {
     type: String,

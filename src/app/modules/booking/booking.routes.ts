@@ -9,14 +9,14 @@ const router = Router();
 
 router.post(
   '/',
-  auth(USER_ROLE.admin, USER_ROLE.user),
+  auth(USER_ROLE.user),
   validateRequest(bookingValidationSchemas.createBookingValidationSchema),
   BookingControllers.createBooking,
 );
 
 router.get(
   '/',
-  auth(USER_ROLE.user, USER_ROLE.admin),
+  auth(USER_ROLE.user),
   BookingControllers.getUserRentals,
 );
 
