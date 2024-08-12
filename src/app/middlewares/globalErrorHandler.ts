@@ -9,6 +9,7 @@ import handleDuplicateError from '../errors/handleDuplicateError';
 import handleValidationError from '../errors/handleValidationError';
 import handleZodError from '../errors/handleZodError';
 import { TErrorSources } from '../interface/error';
+import httpStatus from 'http-status';
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   //setting default values
@@ -42,8 +43,15 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     message = simplifiedError?.message;
     errorMessages = simplifiedError?.errorSources;
   } else if (err instanceof AppError) {
-    statusCode = err?.statusCode;
+    // statusCode = err?.statusCode;
     message = err.message;
+    if (message === 'No Data Found') {
+      return res.status(httpStatus.NOT_FOUND).json({
+        success: false,
+        message: message,
+        data: [],
+      });
+    }
     errorMessages = [
       {
         path: '',

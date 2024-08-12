@@ -9,7 +9,7 @@ import bcrypt from 'bcrypt';
 const getProfileFromDB = async (id: string) => {
   const user = await User.findById(id);
   if (!user) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
+    throw new AppError(httpStatus.BAD_REQUEST, 'No Data Found');
   }
   // removing the isDeleted flag and password  from response
   const { isDeleted, password, ...restData } = user.toObject();
@@ -24,7 +24,7 @@ const updateProfileIntoDB = async (id: string, payload: Partial<TUser>) => {
   }
   // check if it's deleted
   if (user.isDeleted) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'User is deleted');
+    throw new AppError(httpStatus.BAD_REQUEST, 'No Data Found');
   }
   // hashing the pass if provided
   if (payload.password) {
