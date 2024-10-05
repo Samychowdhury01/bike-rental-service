@@ -7,6 +7,7 @@ const bikeSchema = new Schema<TBike, IBikeModel>({
     type: String,
     required: true,
     unique: true,
+    trim: true
   },
   description: {
     type: String,
@@ -31,15 +32,24 @@ const bikeSchema = new Schema<TBike, IBikeModel>({
   model: {
     type: String,
     required: true,
+    trim: true
   },
   brand: {
     type: String,
     required: true,
+    trim: true
   },
   isDeleted: {
     type: Boolean,
     default: false,
   },
+  image: {
+    type: String,
+  },
+  ratings: {
+    type: Number,
+    required: true
+  }
 });
 // removing isDeleted flag from response doc
 bikeSchema.post('save', async function (doc: any, next) {

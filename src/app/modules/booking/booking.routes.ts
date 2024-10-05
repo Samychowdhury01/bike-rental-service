@@ -14,10 +14,16 @@ router.post(
   BookingControllers.createBooking,
 );
 
+
 router.get(
   '/',
   auth(USER_ROLE.user),
   BookingControllers.getUserRentals,
+);
+router.get(
+  '/all',
+  auth(USER_ROLE.admin),
+  BookingControllers.getAllRentals,
 );
 
 router.put(

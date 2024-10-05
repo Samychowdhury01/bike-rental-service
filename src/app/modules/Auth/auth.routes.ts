@@ -18,5 +18,7 @@ router.post(
   validateRequest(AuthValidationSchema.loginSchema),
   AuthControllers.loginUser,
 );
+// Login with google
+router.post('/google', AuthControllers.googleAuth);
 
 export const AuthRoutes = router;

@@ -46,6 +46,8 @@ const createBikeValidationSchema = z.object({
       })
       .min(1, { message: 'Brand is required' }),
     isDeleted: z.boolean().optional(), // Optional field, default to false
+    image: z.string().optional(), // Optional field, default to false
+    ratings: z.number()
   }),
 });
 
@@ -95,6 +97,8 @@ const updateBikeValidationSchema = z.object({
         .min(1, { message: 'Brand is required' })
         .optional(),
       isDeleted: z.boolean().optional(),
+      image: z.string().optional(),
+      ratings: z.number().optional()
     })
     .refine((data) => Object.keys(data).length > 0, {
       message: 'At least one field must be provided for update',

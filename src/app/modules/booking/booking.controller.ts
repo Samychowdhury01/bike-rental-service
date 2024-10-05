@@ -5,7 +5,7 @@ import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
 
 const createBooking = catchAsync(async (req: Request, res: Response) => {
-  const userData = req.user;
+  const userData = req.user.userId;
   const result = await BookingServices.createBookingIntoDB(userData, req.body);
   sendResponse(res, {
     success: true,
@@ -25,6 +25,16 @@ const getUserRentals = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getAllRentals = catchAsync(async (req: Request, res: Response) => {
+  const result = await BookingServices.getAllRentalsFromDB()
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Rentals retrieved successfully',
+    data: result,
+  });
+});
 
 // update booking details after return the bike
 const returnedBike = catchAsync(async (req: Request, res: Response) => {
@@ -37,8 +47,13 @@ const returnedBike = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+
+
+
 export const BookingControllers = {
   createBooking,
   getUserRentals,
   returnedBike,
+  getAllRentals
 };

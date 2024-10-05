@@ -10,6 +10,8 @@ export type TBike = {
     model: string;
     brand : string;
     isDeleted?: boolean
+    image?: string
+    ratings: number
 }
 
 export interface IBikeModel extends Model<TBike> {

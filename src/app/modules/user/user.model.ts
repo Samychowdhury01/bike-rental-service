@@ -10,17 +10,18 @@ const userSchema = new Schema<TUser, TUserModel>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, default: 'change the password' },
     phone: {
       type: String,
-      required: true,
+      default: 'change the phone number',
     },
     address: {
       type: String,
-      required: true,
+      default: 'change the address',
     },
     role: {
       type: String,
+      default: 'user',
       enum: {
         values: role,
         message: '{VALUE} is not a valid role',
@@ -39,8 +40,13 @@ const userSchema = new Schema<TUser, TUserModel>(
 // hashing password before saving into DB
 userSchema.pre('save', async function (next) {
   const user = this;
-  user.password = await bcrypt.hash(user.password, Number(config.sault_rounds));
-  next();
+  if (user.password) {
+    user.password = await bcrypt.hash(
+      user.password,
+      Number(config.sault_rounds),
+    );
+    next();
+  }
 });
 
 // set empty string password property

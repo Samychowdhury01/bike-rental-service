@@ -1,26 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { JwtPayload } from 'jsonwebtoken';
-import { TCreateBooking } from './booking.interface';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { User } from '../user/user.model';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { Bike } from '../bike/bike.model';
 import { Booking } from './booking.model';
 
-const createBookingIntoDB = async (
-  userData: JwtPayload,
-  payload: TCreateBooking,
-) => {
+const createBookingIntoDB = async (userId : string, payload: Record<string, unknown>) => {
   // start session
   const session = await mongoose.startSession();
   try {
     // start transaction
     session.startTransaction();
-    const user = await User.findById(userData.userId);
+    const user = await User.findById(userId);
     const bike = await Bike.findById(payload.bikeId);
-
     // check if the user exist
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, 'Wrong user ID');
@@ -47,6 +41,7 @@ const createBookingIntoDB = async (
       bikeId: bike._id,
       startTime: payload.startTime,
     };
+
     const booking = await Booking.create([bookingData], { session });
     //create a student
     if (!booking.length) {
@@ -64,6 +59,7 @@ const createBookingIntoDB = async (
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
+    
     throw new Error(error);
   }
 };
@@ -75,7 +71,16 @@ const getUserRentalsFromDB = async (userId: string) => {
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User does exist');
   }
-  const bookings = await Booking.find({ userId });
+  const bookings = await Booking.find({ userId }).populate({
+    path: 'bikeId',
+  });
+  return bookings;
+};
+// get all rentals
+const getAllRentalsFromDB = async () => {
+  const bookings = await Booking.find({
+    status: 'unpaid',
+  });
   return bookings;
 };
 
@@ -92,7 +97,6 @@ const updateBookingDetailsAfterReturn = async (id: string) => {
     );
   }
   const bike = await Bike.findById(booking?.bikeId);
-
   //   calculating the cost
   const startTime = new Date(booking.startTime);
   const returnTime = new Date();
@@ -127,8 +131,27 @@ const updateBookingDetailsAfterReturn = async (id: string) => {
   return updatedBookingData;
 };
 
+const updateBookingStatusAfterPayment = async (id: string) => {
+  const booking = await Booking.findById(id);
+  if (!booking) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'No Data Found');
+  }
+  const updateBookingStatus = await Booking.findByIdAndUpdate(
+    booking._id,
+    {
+      status: 'paid',
+    },
+    {
+      new: true,
+    },
+  );
+  return updateBookingStatus;
+};
+
 export const BookingServices = {
   createBookingIntoDB,
   getUserRentalsFromDB,
+  getAllRentalsFromDB,
   updateBookingDetailsAfterReturn,
+  updateBookingStatusAfterPayment,
 };

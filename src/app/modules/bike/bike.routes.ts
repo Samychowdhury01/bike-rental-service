@@ -17,6 +17,8 @@ router.post(
 
 // get all bikes user and admin both can see this route
 router.get('/', BikeControllers.getAllBikes);
+// get all bikes user and admin both can see this route
+router.get('/:id', BikeControllers.getSingleBike);
 
 // update bike data
 router.put(

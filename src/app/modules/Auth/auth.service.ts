@@ -33,7 +33,7 @@ const loginUser = async (payload: TLoginUser) => {
   // matching the password
   const isPasswordMatched = await User.isPasswordMatched(
     payload.password,
-    user.password,
+    user.password as string,
   );
   // if password does match throw error
   if (!isPasswordMatched) {
@@ -43,6 +43,7 @@ const loginUser = async (payload: TLoginUser) => {
   // jwt payload data
   const jwtPayload = {
     userId: user._id,
+    username: user.name,
     role: user.role,
   };
   // signing a accessToken
@@ -51,14 +52,66 @@ const loginUser = async (payload: TLoginUser) => {
   });
 
   // removing the isDeleted flag and password  from response
-  const { isDeleted, password,...restData } = user.toObject();
+  const { isDeleted, password, ...restData } = user.toObject();
   return {
     accessToken,
     restData,
   };
 };
 
+// google Authentication
+const googleAuth = async (payload: TUser) => {
+  const user = await User.findOne({ email: payload.email });
+  // check user exist or not
+  if (!user) {
+    // create new user
+    const newUser = await User.create(payload);
+    // jwt payload data
+    const jwtPayload = {
+      userId: newUser._id,
+      username: newUser.name,
+      role: newUser.role,
+    };
+    // signing a accessToken
+    const accessToken = jwt.sign(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      {
+        expiresIn: '30d',
+      },
+    );
+
+    // removing the isDeleted flag and password  from response
+    const { isDeleted, password, ...restData } = newUser.toObject();
+    return {
+      accessToken,
+      restData,
+    };
+  } else {
+    // jwt payload data
+    const jwtPayload = {
+      userId: user._id,
+      username: user.name,
+      role: user.role,
+    };
+    // signing a accessToken
+    const accessToken = jwt.sign(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      {
+        expiresIn: '30d',
+      },
+    );
+    // removing the isDeleted flag and password  from response
+    const { isDeleted, password, ...restData } = user.toObject();
+    return {
+      accessToken,
+      restData,
+    };
+  }
+};
 export const AuthServices = {
   createUserIntoDB,
   loginUser,
+  googleAuth
 };

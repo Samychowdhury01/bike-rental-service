@@ -9,23 +9,21 @@ import sendResponse from '../utils/sendResponse';
 
 const auth = (...requireRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization;
-
-    // if token is not given throwing an error
-    if (!token) {
+    const authHeader = req.headers.authorization;
+    // if token is not given or "Bearer" is missing throwing an error
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return sendResponse(res, {
         success: false,
         statusCode: httpStatus.UNAUTHORIZED,
         message: 'Unauthorized',
       });
     }
-
+    const token = authHeader.split(' ')[1];
     // validating the token
     const decoded = jwt.verify(
       token as string,
       config.jwt_access_secret as string,
     );
-
     // if token is invalid or expired throwing an error
     if (!decoded) {
       return sendResponse(res, {

@@ -10,10 +10,20 @@ router.get(
   auth(USER_ROLE.admin, USER_ROLE.user),
   UserControllers.getProfile,
 );
+// get all users from DB
+router.get('/', auth(USER_ROLE.admin), UserControllers.getAllUsers);
+router.get(
+  '/dashboard',
+  auth(USER_ROLE.admin, USER_ROLE.user),
+  UserControllers.getDashboardData,
+);
+
 router.put(
   '/me',
   auth(USER_ROLE.admin, USER_ROLE.user),
   UserControllers.updateProfile,
 );
+router.put('/promote/:id', auth(USER_ROLE.admin), UserControllers.promoteUser);
+router.delete('/:id', auth(USER_ROLE.admin), UserControllers.removeUser);
 
 export const UserRoutes = router;

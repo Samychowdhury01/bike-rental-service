@@ -7,9 +7,10 @@ export type TBooking = {
   returnTime?: Date | null;
   totalCost?: number;
   isReturned?: boolean;
+  status?: 'paid' | 'unpaid';
 };
 
 export type TCreateBooking = {
   bikeId: Types.ObjectId;
   startTime: Date;
-}
+};
