@@ -139,7 +139,7 @@ const dashBoardDataFromDB = async (id: string) => {
       bookings.forEach((booking) => {
         if (booking.returnTime && booking.startTime) {
           const diffInMilliseconds =
-            Number(booking.returnTime) - Number(booking.startTime);
+            Number(booking.startTime) - Number(booking.returnTime);
           const totalHours = diffInMilliseconds / (1000 * 60 * 60); // Convert to hours
           hours += totalHours;
         }

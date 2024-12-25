@@ -12,6 +12,7 @@ router.get(
 );
 // get all users from DB
 router.get('/', auth(USER_ROLE.admin), UserControllers.getAllUsers);
+
 router.get(
   '/dashboard',
   auth(USER_ROLE.admin, USER_ROLE.user),

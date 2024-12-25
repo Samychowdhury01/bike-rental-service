@@ -7,7 +7,10 @@ import httpStatus from 'http-status';
 import { Bike } from '../bike/bike.model';
 import { Booking } from './booking.model';
 
-const createBookingIntoDB = async (userId : string, payload: Record<string, unknown>) => {
+const createBookingIntoDB = async (
+  userId: string,
+  payload: Record<string, unknown>,
+) => {
   // start session
   const session = await mongoose.startSession();
   try {
@@ -59,7 +62,7 @@ const createBookingIntoDB = async (userId : string, payload: Record<string, unkn
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
-    
+
     throw new Error(error);
   }
 };
@@ -78,13 +81,58 @@ const getUserRentalsFromDB = async (userId: string) => {
 };
 // get all rentals
 const getAllRentalsFromDB = async () => {
-  const bookings = await Booking.find({
-    status: 'unpaid',
-  });
+  const bookings = await Booking.find({});
   return bookings;
 };
 
 // return bike functionalities
+// const updateBookingDetailsAfterReturn = async (id: string) => {
+//   const booking = await Booking.findById(id);
+//   if (!booking) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'No Data Found');
+//   }
+//   if (booking.isReturned) {
+//     throw new AppError(
+//       httpStatus.BAD_REQUEST,
+//       'This bike has already been returned.',
+//     );
+//   }
+//   const bike = await Bike.findById(booking?.bikeId);
+//   //   calculating the cost
+//   const startTime = new Date(booking.startTime);
+//   const returnTime = new Date();
+//   const rentalDurationHours = Math.ceil(
+//     (returnTime.getTime() - startTime.getTime()) / (1000 * 60 * 60),
+//   );
+//   const pricePerHour = bike?.pricePerHour as number;
+//   const totalCost = rentalDurationHours * pricePerHour;
+
+//   // update bike available status
+//   const updateBikeStatus = await Bike.findByIdAndUpdate(
+//     booking.bikeId,
+//     {
+//       isAvailable: true,
+//     },
+//     {
+//       new: true,
+//     },
+//   );
+//   //   update booking data
+//   const updatedBookingData = await Booking.findByIdAndUpdate(
+//     booking._id,
+//     {
+//       isReturned: true,
+//       returnTime,
+//       totalCost,
+//       status: "unpaid"
+//     },
+//     {
+//       new: true,
+//     },
+//   );
+//   return updatedBookingData;
+// };
+
 const updateBookingDetailsAfterReturn = async (id: string) => {
   const booking = await Booking.findById(id);
   if (!booking) {
@@ -96,17 +144,25 @@ const updateBookingDetailsAfterReturn = async (id: string) => {
       'This bike has already been returned.',
     );
   }
+
   const bike = await Bike.findById(booking?.bikeId);
-  //   calculating the cost
+  if (!bike) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Bike not found');
+  }
+
+  // Calculating the cost
   const startTime = new Date(booking.startTime);
   const returnTime = new Date();
+
+  // Ensure the duration is positive by using Math.abs
   const rentalDurationHours = Math.ceil(
-    (returnTime.getTime() - startTime.getTime()) / (1000 * 60 * 60),
+    Math.abs(returnTime.getTime() - startTime.getTime()) / (1000 * 60 * 60),
   );
+
   const pricePerHour = bike?.pricePerHour as number;
   const totalCost = rentalDurationHours * pricePerHour;
 
-  // update bike available status
+  // Update bike available status
   const updateBikeStatus = await Bike.findByIdAndUpdate(
     booking.bikeId,
     {
@@ -116,18 +172,21 @@ const updateBookingDetailsAfterReturn = async (id: string) => {
       new: true,
     },
   );
-  //   update booking data
+
+  // Update booking data
   const updatedBookingData = await Booking.findByIdAndUpdate(
     booking._id,
     {
       isReturned: true,
       returnTime,
       totalCost,
+      status: 'unpaid',
     },
     {
       new: true,
     },
   );
+
   return updatedBookingData;
 };
 
