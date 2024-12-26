@@ -15,4 +15,5 @@ export default {
   success_url : process.env.SUCCESS_URL,
   cancel_url : process.env.CANCEL_URL,
   redirect_url : process.env.REDIRECT_URL,
+  google_api_key : process.env.GOOGLE_API_KEY,
 };

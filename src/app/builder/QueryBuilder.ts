@@ -48,6 +48,15 @@ class QueryBuilder<T> {
 
     return this;
   }
+  paginate() {
+    const page = Number(this.query.page) || 1;
+    const limit = Number(this.query.limit) || 20; // Default to 20 items per page
+    const skip = (page - 1) * limit;
+
+    this.modelQuery = this.modelQuery.skip(skip).limit(limit);
+
+    return this;
+  }
 }
 
 export default QueryBuilder;

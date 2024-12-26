@@ -3,9 +3,12 @@ import AppError from '../../errors/AppError';
 import { TBike } from './bike.interface';
 import { Bike } from './bike.model';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { generateDescription } from './bike.utils';
 
 const createBikeIntoDB = async (payload: TBike) => {
-  const result = await Bike.create(payload);
+  const generatedDetails = await generateDescription(payload)
+  const bikeDataUpdatedWithDetails = {...payload, details: generatedDetails}
+  const result = await Bike.create(bikeDataUpdatedWithDetails);
   return result;
 };
 
@@ -15,9 +18,8 @@ const createBikeIntoDB = async (payload: TBike) => {
 // };
 
 const getAllBikesFromDB = async (query: Record<string, unknown>) => {
-  const bikeQuery = new QueryBuilder(Bike.find(), query).filter();
+  const bikeQuery = new QueryBuilder(Bike.find({}), query).filter();
   const result = await bikeQuery.modelQuery;
-
   return result;
 };
 const getAllSingleBikeFromDB = async (id : string) => {

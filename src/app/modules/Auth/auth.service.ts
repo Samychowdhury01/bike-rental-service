@@ -46,11 +46,11 @@ const loginUser = async (payload: TLoginUser) => {
     username: user.name,
     role: user.role,
   };
+
   // signing a accessToken
   const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
     expiresIn: '30d',
   });
-
   // removing the isDeleted flag and password  from response
   const { isDeleted, password, ...restData } = user.toObject();
   return {

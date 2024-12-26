@@ -13,6 +13,9 @@ const bikeSchema = new Schema<TBike, IBikeModel>({
     type: String,
     required: true,
   },
+  details: {
+    type: String,
+  },
   pricePerHour: {
     type: Number,
     required: true,
@@ -46,10 +49,6 @@ const bikeSchema = new Schema<TBike, IBikeModel>({
   image: {
     type: String,
   },
-  ratings: {
-    type: Number,
-    required: true
-  }
 });
 // removing isDeleted flag from response doc
 bikeSchema.post('save', async function (doc: any, next) {
