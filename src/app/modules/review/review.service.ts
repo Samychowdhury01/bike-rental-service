@@ -1,8 +1,6 @@
-import httpStatus from 'http-status';
-import AppError from '../../errors/AppError';
 import { TReview } from './review.interface';
 import Review from './review.model';
-import { Bike } from '../bike/bike.model';
+
 import { User } from '../user/user.model';
 
 const CreateReviewIntoDB = async (payload: Partial<TReview>) => {

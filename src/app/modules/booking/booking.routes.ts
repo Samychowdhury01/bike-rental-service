@@ -28,7 +28,7 @@ router.get(
 
 router.put(
   '/:id/return',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.user),
   BookingControllers.returnedBike,
 );
 export const BookingRoutes = router;
