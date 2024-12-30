@@ -7,7 +7,7 @@ export type TBooking = {
   returnTime?: Date | null;
   totalCost?: number;
   isReturned?: boolean;
-  status?: 'paid' | 'unpaid';
+  status?: 'paid' | 'unpaid' | 'canceled';
 };
 
 export type TCreateBooking = {

@@ -1,6 +1,9 @@
 import { Types } from 'mongoose';
 
 export type TPayment = {
-  bookingId: Types.ObjectId;
+  bikeId: Types.ObjectId;
+  userId: Types.ObjectId;
+  totalCost: number
+  paymentType: 'advance'| 'full'
   transactionId?: string;
 };

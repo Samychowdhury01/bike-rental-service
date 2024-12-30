@@ -12,7 +12,7 @@ const bookingSchema = new Schema<TBooking>(
     status: {
       type: String,
       enum: {
-        values: ['paid', 'unpaid'],
+        values: ['paid', 'unpaid', 'canceled'],
       },
       default: 'unpaid',
     },

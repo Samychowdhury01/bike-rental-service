@@ -8,7 +8,7 @@ export const initiatePayment = async (info: any) => {
   const data = {
     store_id: config.amarPay_store_id,
     tran_id: transactionId,
-    success_url: `${config.redirect_url}/confirm?userId=${info.userId}&bikeId=${info.bikeId}&startTime=${info.startTime}&totalCost=${info.totalCost}&bookingId=${info.bookingId}`,
+    success_url: `${config.redirect_url}/confirm?userId=${info.userId}&bikeId=${info.bikeId}&startTime=${info.startTime}&totalCost=${info.totalCost}&bookingId=${info.bookingId}&transactionId=${transactionId}`,
     fail_url: `${config.redirect_url}/cancel`,
     cancel_url: `${config.redirect_url}/cancel`,
     amount: info.amount,
@@ -32,5 +32,8 @@ export const initiatePayment = async (info: any) => {
     body: JSON.stringify(data),
   });
   const result = await response.json();
-  return result;
+  return {
+    transactionId,
+    ...result,
+  };
 };

@@ -8,6 +8,7 @@ export type TUser = {
   phone?: string;
   address?: string;
   role: TRole;
+  points?: number
   isDeleted?: boolean;
 };
 

@@ -6,6 +6,7 @@ import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { Bike } from '../bike/bike.model';
 import { Booking } from './booking.model';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const createBookingIntoDB = async (
   userId: string,
@@ -68,70 +69,100 @@ const createBookingIntoDB = async (
 };
 
 // get all rentals for User
-const getUserRentalsFromDB = async (userId: string) => {
+const getUserRentalsFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
   const user = await User.isUserExist(userId);
 
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User does exist');
   }
-  const bookings = await Booking.find({ userId }).populate({
-    path: 'bikeId',
-  });
-  return bookings;
+  const rentalsQuery = new QueryBuilder(
+    Booking.find({ userId })
+      .populate({
+        path: 'bikeId',
+      })
+      .sort({
+        createdAt: -1,
+      }),
+    query,
+  ).paginate();
+  const rentals = await rentalsQuery.modelQuery;
+  const meta = await rentalsQuery.countTotal();
+
+  return {
+    data: rentals,
+    meta,
+  };
 };
+
 // get all rentals
-const getAllRentalsFromDB = async () => {
-  const bookings = await Booking.find({});
-  return bookings;
+const getAllRentalsFromDB = async (query: Record<string, unknown>) => {
+  const bookingsQuery = new QueryBuilder(
+    Booking.find({}).sort({
+      createdAt: -1,
+    }),
+    query,
+  ).paginate();
+  const bookings = await bookingsQuery.modelQuery;
+  const meta = await bookingsQuery.countTotal();
+  return {
+    data: bookings,
+    meta,
+  };
 };
 
-// return bike functionalities
-// const updateBookingDetailsAfterReturn = async (id: string) => {
-//   const booking = await Booking.findById(id);
-//   if (!booking) {
-//     throw new AppError(httpStatus.BAD_REQUEST, 'No Data Found');
-//   }
-//   if (booking.isReturned) {
-//     throw new AppError(
-//       httpStatus.BAD_REQUEST,
-//       'This bike has already been returned.',
-//     );
-//   }
-//   const bike = await Bike.findById(booking?.bikeId);
-//   //   calculating the cost
-//   const startTime = new Date(booking.startTime);
-//   const returnTime = new Date();
-//   const rentalDurationHours = Math.ceil(
-//     (returnTime.getTime() - startTime.getTime()) / (1000 * 60 * 60),
-//   );
-//   const pricePerHour = bike?.pricePerHour as number;
-//   const totalCost = rentalDurationHours * pricePerHour;
+// get all the canceled bookings
+const getAllCanceledRentalsFromDB = async (query: Record<string, unknown>) => {
+  // will populate bikeId and userId
+  const bookingsQuery = new QueryBuilder(
+    Booking.find({ status: 'canceled' })
+      .populate({
+        path: 'bikeId',
+        select: 'name',
+      })
+      .populate({
+        path: 'userId',
+        select: 'name',
+      }),
+    query,
+  ).paginate();
 
-//   // update bike available status
-//   const updateBikeStatus = await Bike.findByIdAndUpdate(
-//     booking.bikeId,
-//     {
-//       isAvailable: true,
-//     },
-//     {
-//       new: true,
-//     },
-//   );
-//   //   update booking data
-//   const updatedBookingData = await Booking.findByIdAndUpdate(
-//     booking._id,
-//     {
-//       isReturned: true,
-//       returnTime,
-//       totalCost,
-//       status: "unpaid"
-//     },
-//     {
-//       new: true,
-//     },
-//   );
-//   return updatedBookingData;
-// };
+  const bookings = await bookingsQuery.modelQuery;
+  const meta = await bookingsQuery.countTotal();
+  return {
+    data: bookings,
+    meta,
+  };
+};
+
+// get all the canceled bookings
+const getUserCanceledRentalsFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  // will populate bikeId and userId
+  const bookingsQuery = new QueryBuilder(
+    Booking.find({ userId, status: 'canceled' })
+      .populate({
+        path: 'bikeId',
+        select: 'name',
+      })
+      .populate({
+        path: 'userId',
+        select: 'name',
+      }),
+    query,
+  ).paginate();
+
+  const bookings = await bookingsQuery.modelQuery;
+  const meta = await bookingsQuery.countTotal();
+  return {
+    data: bookings,
+    meta,
+  };
+};
 
 const updateBookingDetailsAfterReturn = async (id: string) => {
   const booking = await Booking.findById(id);
@@ -207,10 +238,62 @@ const updateBookingStatusAfterPayment = async (id: string) => {
   return updateBookingStatus;
 };
 
+// cancel booking functionalities
+const cancelBookingFromDB = async (rentalId: string) => {
+  const booking = await Booking.findById(rentalId);
+  if (!booking) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'No Data Found');
+  }
+
+  if (booking.isReturned) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'This bike has already been returned.',
+    );
+  }
+
+  const bike = await Bike.findById(booking?.bikeId);
+  if (!bike) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Bike not found');
+  }
+
+  // Update bike available status
+  const updateBikeStatus = await Bike.findByIdAndUpdate(
+    booking.bikeId,
+    {
+      isAvailable: true,
+    },
+    {
+      new: true,
+    },
+  );
+
+  const returnTime = new Date();
+
+  // Update booking data
+  const updatedBookingData = await Booking.findByIdAndUpdate(
+    booking._id,
+    {
+      isReturned: true,
+      returnTime,
+      totalCost: 0,
+      status: 'canceled',
+    },
+    {
+      new: true,
+    },
+  );
+
+  return updatedBookingData;
+};
+
 export const BookingServices = {
   createBookingIntoDB,
   getUserRentalsFromDB,
+  getAllCanceledRentalsFromDB,
+  getUserCanceledRentalsFromDB,
   getAllRentalsFromDB,
   updateBookingDetailsAfterReturn,
   updateBookingStatusAfterPayment,
+  cancelBookingFromDB,
 };

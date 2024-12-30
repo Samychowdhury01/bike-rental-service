@@ -27,6 +27,10 @@ const userSchema = new Schema<TUser, TUserModel>(
         message: '{VALUE} is not a valid role',
       },
     },
+    points: {
+      type: Number,
+      default: 0,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -25,10 +25,28 @@ router.get(
   auth(USER_ROLE.admin),
   BookingControllers.getAllRentals,
 );
+// get all the canceled bookings 
+router.get(
+  '/canceled',
+  auth(USER_ROLE.admin),
+  BookingControllers.getAllCanceledRentals,
+)
 
+// get all user canceled bookings 
+router.get(
+  '/user/canceled',
+  auth(USER_ROLE.user),
+  BookingControllers.getUserCanceledRentals,
+)
 router.put(
   '/:id/return',
-  auth(USER_ROLE.admin, USER_ROLE.user),
+  auth(USER_ROLE.admin),
   BookingControllers.returnedBike,
+);
+
+router.put(
+  '/:id/cancel',
+  auth(USER_ROLE.user),
+  BookingControllers.cancelBooking,
 );
 export const BookingRoutes = router;

@@ -23,7 +23,13 @@ router.post(
 // confirmation
 router.post('/confirm', PaymentControllers.isConfirmed);
 
-// cancelation
+// cancel
 router.post('/cancel', PaymentControllers.isCanceled);
+
+// get user payment history
+router.get('/history', auth(USER_ROLE.user), PaymentControllers.getPaymentHistory);
+
+// admin will get all the payment history 
+router.get('/admin/history', auth(USER_ROLE.admin), PaymentControllers.getAllPaymentHistory);
 
 export const PaymentRoutes = router;

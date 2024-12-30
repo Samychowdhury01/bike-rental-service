@@ -17,20 +17,48 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllReviewsForSingleBike = catchAsync(async (req: Request, res: Response) => {
-  const {bikeId} = req.params;
-  
-  const result = await ReviewServices.getAllReviewForSingleBike(bikeId);
+const getAllReviewsForSingleBike = catchAsync(
+  async (req: Request, res: Response) => {
+    const { bikeId } = req.params;
+
+    const result = await ReviewServices.getAllReviewForSingleBike(bikeId);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: 'Review retrieved successfully',
+      data: result,
+    });
+  },
+);
+
+const getUserReviews = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const query = req.query;
+
+  const result = await ReviewServices.getUserReviewsFromDB(userId, query);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: 'Review retrieved successfully',
-    data: result,
+    message: 'User reviews retrieved successfully',
+    data: result.reviews,
+    meta: result.meta,
   });
 });
 
+const getAllReviews = catchAsync(async (req: Request, res: Response) => {
+  const result = await ReviewServices.getAllReviewsFromDB(req.query);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'All views retrieved successfully',
+    data: result.reviews,
+    meta: result.meta,
+  });
+});
 
 export const ReviewControllers = {
   createReview,
-  getAllReviewsForSingleBike
+  getAllReviewsForSingleBike,
+  getUserReviews,
+  getAllReviews,
 };

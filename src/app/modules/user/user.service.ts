@@ -156,6 +156,7 @@ const dashBoardDataFromDB = async (id: string) => {
       hours: Number(hours.toFixed(2)),
       averageCostPerHour,
       bookings,
+      points: user.points,
     };
   }
 };
