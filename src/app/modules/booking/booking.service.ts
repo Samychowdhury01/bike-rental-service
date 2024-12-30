@@ -82,6 +82,11 @@ const getUserRentalsFromDB = async (
     Booking.find({ userId })
       .populate({
         path: 'bikeId',
+        select: 'name',
+      })
+      .populate({
+        path: 'userId',
+        select: 'points',
       })
       .sort({
         createdAt: -1,
@@ -286,6 +291,8 @@ const cancelBookingFromDB = async (rentalId: string) => {
 
   return updatedBookingData;
 };
+
+
 
 export const BookingServices = {
   createBookingIntoDB,

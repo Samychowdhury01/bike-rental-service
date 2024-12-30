@@ -1,8 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { User } from '../user/user.model';
 import { initiatePayment } from '../../utils/initiatePayment';
 import { Payment } from './payment.model';
 import { TPayment } from './payment.interface';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { Bike } from '../bike/bike.model';
+import { Booking } from '../booking/booking.model';
+import httpStatus from 'http-status';
+import AppError from '../../errors/AppError';
 
 const makeAdvancePayment = async (
   userId: string,
@@ -90,9 +95,64 @@ const getAllPaymentHistoryFromDB = async (query: Record<string, unknown>) => {
   };
 };
 
+// pay through points
+const payThroughPoints = async (rentalId: string) => {
+  const booking = await Booking.findById(rentalId);
+  const user = await User.findById(booking?.userId);
+  const bike = await Bike.findById(booking?.bikeId);
+
+  if (!booking) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'No Data Found');
+  }
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
+  }
+
+  // Check if the user has enough points
+  if ((booking.totalCost as number) > (user?.points as number)) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Insufficient points');
+  }
+  // Update user points
+  const updatedUserPoints = await User.findByIdAndUpdate(
+    user._id,
+    {
+      points: (user.points as number) - (booking.totalCost as number),
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+  // Update booking status
+  const updatedBooking = await Booking.findByIdAndUpdate(
+    booking._id,
+    {
+      status: 'paid',
+      isReturned: true,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+  // Update bike status
+  const updatedBike = await Bike.findByIdAndUpdate(
+    bike!._id,
+    {
+      isAvailable: true,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+
+  return updatedBooking;
+};
 export const PaymentServices = {
   makeAdvancePayment,
   createPaymentIntoDB,
   getPaymentHistoryFromDB,
   getAllPaymentHistoryFromDB,
+  payThroughPoints
 };

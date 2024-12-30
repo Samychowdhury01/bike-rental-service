@@ -58,7 +58,7 @@ const isConfirmed = catchAsync(async (req: Request, res: Response) => {
     const createPayment = await PaymentServices.createPaymentIntoDB(
       advancePaymentPayload as TPayment,
     );
-    
+
     const result = await BookingServices.createBookingIntoDB(
       userId as string,
       payload,
@@ -94,32 +94,46 @@ const isCanceled = catchAsync(async (req: Request, res: Response) => {
 // get user payment history
 const getPaymentHistory = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
-  const result = await PaymentServices.getPaymentHistoryFromDB(userId, req.query);
+  const result = await PaymentServices.getPaymentHistoryFromDB(
+    userId,
+    req.query,
+  );
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: 'Payment history retrieved successfully',
     data: result.data,
-    meta: result.meta
+    meta: result.meta,
   });
 });
 // admin can access all the payment history
 const getAllPaymentHistory = catchAsync(async (req: Request, res: Response) => {
-  
   const result = await PaymentServices.getAllPaymentHistoryFromDB(req.query);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: 'Payment history retrieved successfully',
     data: result.data,
-    meta: result.meta
+    meta: result.meta,
   });
 });
+
+const usePoints = catchAsync(async (req, res) => {
+  const { rentalId } = req.params;
+  const result = await PaymentServices.payThroughPoints(rentalId);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+  });
+});
+
 export const PaymentControllers = {
   advancePayment,
   isConfirmed,
   makePayment,
   isCanceled,
   getPaymentHistory,
-  getAllPaymentHistory
+  getAllPaymentHistory,
+  usePoints,
 };

@@ -15,11 +15,7 @@ router.post(
   PaymentControllers.advancePayment,
 );
 
-router.post(
-  '/',
-  auth(USER_ROLE.user),
-  PaymentControllers.makePayment,
-);
+router.post('/', auth(USER_ROLE.user), PaymentControllers.makePayment);
 // confirmation
 router.post('/confirm', PaymentControllers.isConfirmed);
 
@@ -27,9 +23,23 @@ router.post('/confirm', PaymentControllers.isConfirmed);
 router.post('/cancel', PaymentControllers.isCanceled);
 
 // get user payment history
-router.get('/history', auth(USER_ROLE.user), PaymentControllers.getPaymentHistory);
+router.get(
+  '/history',
+  auth(USER_ROLE.user),
+  PaymentControllers.getPaymentHistory,
+);
 
-// admin will get all the payment history 
-router.get('/admin/history', auth(USER_ROLE.admin), PaymentControllers.getAllPaymentHistory);
+// admin will get all the payment history
+router.get(
+  '/admin/history',
+  auth(USER_ROLE.admin),
+  PaymentControllers.getAllPaymentHistory,
+);
+
+router.put(
+  '/use-points/:rentalId',
+  auth(USER_ROLE.user),
+  PaymentControllers.usePoints,
+);
 
 export const PaymentRoutes = router;
